@@ -284,7 +284,7 @@ def get_offers():
 # SUMIT
 
 def track_order():
-    email = input("Enter your UID : ")
+    email = input("Enter your email : ")
     try:
         print(track_order_data[email])
     except:
