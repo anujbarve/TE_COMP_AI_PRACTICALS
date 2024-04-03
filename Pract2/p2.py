@@ -1,66 +1,70 @@
-from queue import PriorityQueue
+import heapq
+import itertools
 
-GOAL_STATE = [[1, 2, 3], [8, 0, 4], [7, 6, 5]]
+# Define the goal state
+goal_state = (1, 2, 3, 8, 0, 4, 7, 6, 5)  # 0 represents the blank tile
 
-def calculate_distance(state):
+# Define the possible moves for each tile
+moves = {
+    0: [1, 3],
+    1: [0, 2, 4],
+    2: [1, 5],
+    3: [0, 4, 6],
+    4: [1, 3, 5, 7],
+    5: [2, 4, 8],
+    6: [3, 7],
+    7: [4, 6, 8],
+    8: [5, 7]
+}
+
+# Define the heuristic function (Manhattan distance)
+def heuristic(state):
     distance = 0
-    for i in range(3):
-        for j in range(3):
-            if state[i][j] != 0:
-                goal_i, goal_j = divmod(state[i][j] - 1, 3)
-                distance += abs(i - goal_i) + abs(j - goal_j)
+    for i in range(9):
+        if state[i] != goal_state[i] and state[i] != 0:
+            goal_index = goal_state.index(state[i])
+            distance += abs(i % 3 - goal_index % 3) + abs(i // 3 - goal_index // 3)
     return distance
 
-def get_possible_moves(state):
-    i, j = next((i, j) for i, row in enumerate(state) for j, val in enumerate(row) if val == 0)
-    possible_moves = []
-    if i > 0:
-        possible_moves.append((i - 1, j))
-    if i < 2:
-        possible_moves.append((i + 1, j))
-    if j > 0:
-        possible_moves.append((i, j - 1))
-    if j < 2:
-        possible_moves.append((i, j + 1))
-    return possible_moves
+# Define the A* algorithm
+def astar(start):
+    open_list = []
+    heapq.heappush(open_list, (0, next(itertools.count()), start))  # Corrected line
+    g_values = {start: 0}
+    came_from = {}
 
-def perform_move(state, move):
-    i, j = next((i, j) for i, row in enumerate(state) for j, val in enumerate(row) if val == 0)
-    new_state = [row[:] for row in state]
-    new_i, new_j = move
-    new_state[i][j], new_state[new_i][new_j] = new_state[new_i][new_j], new_state[i][j]
-    return new_state
-
-def a_star_search(initial_state):
-    frontier = PriorityQueue()
-    frontier.put((0, initial_state))
-    explored = set()
-
-    while not frontier.empty():
-        _, current_state = frontier.get()
-        if current_state == GOAL_STATE:
-            return current_state
+    while open_list:
+        _, _, current = heapq.heappop(open_list)
+        if current == goal_state:
+            path = []
+            while current in came_from:
+                path.append(current)
+                current = came_from[current]
+            return path[::-1]
         
-        explored.add(tuple(map(tuple, current_state)))
+        zero_index = current.index(0)
+        for move in moves[zero_index]:
+            new_state = list(current)
+            new_state[zero_index], new_state[move] = new_state[move], new_state[zero_index]
+            new_state = tuple(new_state)
+            tentative_g = g_values[current] + 1
+            if new_state not in g_values or tentative_g < g_values[new_state]:
+                g_values[new_state] = tentative_g
+                f_value = tentative_g + heuristic(new_state)
+                heapq.heappush(open_list, (f_value, next(itertools.count()), new_state))  # Corrected line
+                came_from[new_state] = current
 
-        for move in get_possible_moves(current_state):
-            new_state = perform_move(current_state, move)
-            if tuple(map(tuple, new_state)) not in explored:
-                priority = calculate_distance(new_state)
-                frontier.put((priority, new_state))
-
-    return None
-
-initial_state = [
-    [1, 2, 6],
-    [7, 0, 4],
-    [8, 3, 5]
-]
-
-result = a_star_search(initial_state)
-if result:
+# Test the algorithm with a sample puzzle
+start_state = (2, 8, 3, 1, 6, 4, 7, 0, 5)  # Initial state of the puzzle
+solution_path = astar(start_state)
+if solution_path:
     print("Solution found!")
-    for row in result:
-        print(row)
+    print("Number of steps:", len(solution_path))
+    for step, state in enumerate(solution_path):
+        print(f"Step {step + 1}:")
+        print(state[:3])
+        print(state[3:6])
+        print(state[6:])
+        print()
 else:
-    print("No solution found.")
+    print("No solution found!")
