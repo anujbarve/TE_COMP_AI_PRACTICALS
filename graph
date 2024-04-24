@@ -27,7 +27,9 @@ class Graph:
                     return True
                 colored[v] = None
 
-    def graph_coloring(self, num_colors):
+    def graph_coloring(self):
+        max_degree = self.get_max_degree()
+        num_colors = min(max_degree + 1, 7)  # Use all 7 colors of the rainbow if possible
         colored = [None] * self.vertices
         if not self.graph_coloring_util(num_colors, colored, 0):
             print("Solution does not exist")
@@ -52,7 +54,4 @@ for _ in range(num_edges):
     u, v = map(int, input().split())
     australia_map.add_edge(u, v)
 
-# Taking user input for the number of colors
-num_colors = int(input("Enter the number of colors (maximum 7): "))
-
-australia_map.graph_coloring(num_colors)
+australia_map.graph_coloring()
