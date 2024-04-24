@@ -16,31 +16,32 @@ class Graph:
                 return False
         return True
 
-    def graph_coloring_util(self, m, colored, v):
+    def graph_coloring_util(self, colors, colored, v):
         if v == self.vertices:
             return True
 
-        for color in range(m):
+        for color in colors:
             if self.is_safe(v, color, colored):
                 colored[v] = color
-                if self.graph_coloring_util(m, colored, v + 1):
+                if self.graph_coloring_util(colors, colored, v + 1):
                     return True
                 colored[v] = None
 
     def graph_coloring(self):
         max_degree = self.get_max_degree()
         num_colors = min(max_degree + 1, 7)  # Use all 7 colors of the rainbow if possible
+        colors = ['Red', 'Orange', 'Yellow', 'Green', 'Blue', 'Indigo', 'Violet']
         colored = [None] * self.vertices
-        if not self.graph_coloring_util(num_colors, colored, 0):
+        if not self.graph_coloring_util(colors[:num_colors], colored, 0):
             print("Solution does not exist")
             return False
 
-        print("Solution exists and the coloring is:")
-        color_map = {
-            0: 'Red', 1: 'Orange', 2: 'Yellow', 3: 'Green', 4: 'Blue', 5: 'Indigo', 6: 'Violet'
-        }  # Mapping color index to color name
+        used_colors = set(colored)
+        print("Colors used:", used_colors)
+
+        print("Solution exists and the coloring is as follows:")
         for i in range(self.vertices):
-            print("State", i, "is colored with", color_map[colored[i]])
+            print("State", i, "is colored with", colored[i])
         return True
 
 # Taking user input for the number of states
