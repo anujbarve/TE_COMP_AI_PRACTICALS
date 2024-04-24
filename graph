@@ -7,46 +7,52 @@ class Graph:
         self.graph[u].append(v)
         self.graph[v].append(u)
 
+    def get_max_degree(self):
+        return max(len(adj_list) for adj_list in self.graph)
+
     def is_safe(self, v, color, colored):
         for i in self.graph[v]:
             if colored[i] == color:
                 return False
         return True
 
-    def graph_coloring_util(self, colors, colored, v):
+    def graph_coloring_util(self, m, colored, v):
         if v == self.vertices:
             return True
 
-        for color in colors:
+        for color in range(m):
             if self.is_safe(v, color, colored):
                 colored[v] = color
-                if self.graph_coloring_util(colors, colored, v + 1):
+                if self.graph_coloring_util(m, colored, v + 1):
                     return True
                 colored[v] = None
 
-    def graph_coloring(self, colors):
+    def graph_coloring(self, num_colors):
         colored = [None] * self.vertices
-        if not self.graph_coloring_util(colors, colored, 0):
+        if not self.graph_coloring_util(num_colors, colored, 0):
             print("Solution does not exist")
             return False
 
         print("Solution exists and the coloring is:")
+        color_map = {
+            0: 'Red', 1: 'Orange', 2: 'Yellow', 3: 'Green', 4: 'Blue', 5: 'Indigo', 6: 'Violet'
+        }  # Mapping color index to color name
         for i in range(self.vertices):
-            print("State", i, "is colored with", colored[i])
+            print("State", i, "is colored with", color_map[colored[i]])
         return True
 
-# Take user input for the number of vertices
-num_vertices = int(input("Enter the number of states: "))
-australia_map = Graph(num_vertices)
+# Taking user input for the number of states
+num_states = int(input("Enter the number of states: "))
+australia_map = Graph(num_states)
 
-# Take user input for the edges of the graph
+# Taking user input for the number of edges
 num_edges = int(input("Enter the number of edges: "))
 print("Enter the edges (separated by space):")
 for _ in range(num_edges):
     u, v = map(int, input().split())
     australia_map.add_edge(u, v)
 
-# Available colors
-colors = ['Red', 'Green', 'Blue']
+# Taking user input for the number of colors
+num_colors = int(input("Enter the number of colors (maximum 7): "))
 
-australia_map.graph_coloring(colors)
+australia_map.graph_coloring(num_colors)
